@@ -61,8 +61,13 @@ def read_novels(path=Path.cwd() / "texts" / "novels"):
     
     # creates dataframe from datalist 
     dataframe = pd.DataFrame(textfile_data)
+
+    # sorts dataframe by year column 
+    sorted_dataframe = dataframe.sort_values(by='year')
+    # resets by ignoring the order of index
+    reset_dataframe = sorted_dataframe.reset_index(drop=True)
     
-    return dataframe
+    return reset_dataframe
 
 
 
