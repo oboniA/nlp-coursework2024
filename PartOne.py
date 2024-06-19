@@ -2,8 +2,6 @@ import nltk
 import spacy
 from pathlib import Path
 import pandas as pd
-from nltk.tokenize import word_tokenize, sent_tokenize
-import re
 
 
 nlp = spacy.load("en_core_web_sm")
@@ -25,7 +23,6 @@ def fk_level(text, d):
     pass
 
 
-
 def count_syl(word, d):
     """Counts the number of syllables in a word given a dictionary of syllables per word.
     if the word is not in the dictionary, syllables are estimated by counting vowel clusters
@@ -38,7 +35,6 @@ def count_syl(word, d):
         int: The number of syllables in the word.
     """
     pass
-
 
 
 def read_novels(path=Path.cwd() / "texts" / "novels"):
@@ -84,28 +80,22 @@ def parse(df, store_path=Path.cwd() / "texts" / "novels" / "parsed", out_name="p
 
 def regex_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using a regular expression."""
-    
+
     pass
 
 
 def nltk_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize."""
 
-    # tokenize text with nltk lib
-    tokens = word_tokenize(text)
-    token_types = set(tokens)
-    token_type_ratio= len(token_types) / len(tokens)
-
-    return(token_type_ratio)
-
+    pass
 
 
 def get_ttrs(df):
     """helper function to add ttr to a dataframe"""
     results = {}
     for i, row in df.iterrows():
-        results[row["title"]] = nltk_ttr(row["text"])
-    return f"\nToken Type Ratio: {results}"
+        results[row["title"]] = regex_ttr(row["text"])
+    return results
 
 
 def get_fks(df):
@@ -147,16 +137,15 @@ if __name__ == "__main__":
     path = Path.cwd() / "texts" / "novels"
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
-    print(df.head(10))
-    nltk.download("cmudict")
+    print(df)
+    #print(df.head())
+    #nltk.download("cmudict")
     #parse(df)
     #print(df.head())
-    print(get_ttrs(df))
+    #print(get_ttrs(df))
     #print(get_fks(df))
     #df = pd.read_pickle(Path.cwd() / "texts" / "novels" / "parsed" / "name.pickle")
     # print(get_subjects(df))
-
-
     """ 
     for i, row in df.iterrows():
         print(row["title"])
