@@ -5,6 +5,7 @@ import pandas as pd
 from nltk.tokenize import word_tokenize, sent_tokenize
 import re
 import pickle
+from collections import Counter
 
 
 
@@ -200,14 +201,55 @@ def subjects_by_verb_pmi(doc, target_verb, top_n=10):
 
 def subjects_by_verb_count(doc, verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list of tuples."""
-    pass
 
+    print(f"start Subject by Verb count.....")
+    subject_counts = Counter()
+    for token in doc:
+        # dependancy parcing for the main verb 
+        if token.lemma_ == "say" and token.dep_ == "ROOT":
+            for child in token.children:
+                # checks if it is a nominal subject of the verb
+                if child.dep_ == 'nsubj':
+                    subject_counts[child.text] += 1
+
+    print(f" Subject by Verb count complete..!")
+    return subject_counts.most_common(10)  # sorts in decending order
+
+
+def get_subject_by_verb(df, verb):
+
+    for i, row in df.iterrows():
+        novel_title= row["title"]
+        parse_doc= row["parsed"]
+
+        print(f"\nNovel {i} Title: {novel_title}")
+        print(f" 10 common syntactic subjects of verb 'say':\n", subjects_by_verb_count(parse_doc, verb))
 
 
 
 def subject_counts(doc):
     """Extracts the most common subjects in a parsed document. Returns a list of tuples."""
-    pass
+    
+    print(f"start Subject count.....")
+    subject_counts = Counter()
+    for token in doc:
+        # dependancy parsing to nominal subject
+        if token.dep_ == "nsubj":
+            subject_counts[token.text] += 1
+
+    print(f"Subject count complete..!")
+    return subject_counts.most_common(10)
+
+
+def get_subjects(df):
+    for i, row in df.iterrows():
+        novel_title= row["title"]
+        parse_doc= row["parsed"]
+
+        print(f"\nNovel {i} Title: {novel_title}")
+        print(f" 10 common syntactic subjects:\n", subject_counts(parse_doc))
+
+
 
 
 
@@ -223,12 +265,13 @@ if __name__ == "__main__":
     #print(df.head(10))
     #nltk.download("cmudict")
     #parse(df)
-    print(df.head())
-    print(get_ttrs(df))
-    print(get_fks(df))
+    # print(df.head())
+    # print(get_ttrs(df))
+    # print(get_fks(df))
     df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
     print(df.head())
     #print(get_subjects(df))
+    print(get_subject_by_verb(df, 'say'))
 
 
     """ 
