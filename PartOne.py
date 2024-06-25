@@ -4,6 +4,8 @@ from pathlib import Path
 import pandas as pd
 from nltk.tokenize import word_tokenize, sent_tokenize
 import re
+import pickle
+
 
 
 nlp = spacy.load("en_core_web_sm")
@@ -24,9 +26,9 @@ def fk_level(text, d):
     """
     words = word_tokenize(text)
     sentence = sent_tokenize(text)
-    syllables = sum(count_syl(word, d) for word in words)
     word_nums = len(words)
     sent_nums = len(sentence)
+    syllables = sum(count_syl(word, d) for word in words)
 
     # prevents zero division errors
     if (word_nums == 0) or (sent_nums == 0):
@@ -79,7 +81,7 @@ def count_syl(word, d):
 
 
 
-def read_novels(path=Path.cwd() / "texts" / "novels"):
+def read_novels(path=Path.cwd() / "p1-texts" / "novels"):
     """Reads texts from a directory of .txt files and returns a DataFrame with the text, title,
     author, and year"""
 
@@ -99,7 +101,10 @@ def read_novels(path=Path.cwd() / "texts" / "novels"):
             file_text= file.read()
         
         # appends texts and parsed data to list
-        textfile_data.append({"text": file_text, "title": title, "author": author, "year": year})
+        textfile_data.append({"text": file_text, 
+                              "title": title, 
+                              "author": author, 
+                              "year": year})
     
     # creates dataframe from datalist 
     dataframe = pd.DataFrame(textfile_data)
@@ -113,16 +118,46 @@ def read_novels(path=Path.cwd() / "texts" / "novels"):
 
 
 
-def parse(df, store_path=Path.cwd() / "texts" / "novels" / "parsed", out_name="parsed.pickle"):
+def parse_sections(text):
+    """parses texts in section in cases where texts exceed spaCy maximum length"""
+
+    # when text length is more than spacy max len
+    if len(text) > nlp.max_length:
+        sections=[] # stores texts in chunks
+
+        # gets chunks out of a text by itirating
+        for start_pos in range(0, len(text), nlp.max_length):
+            # split texts into spacy chunks to parse
+            end_pos = start_pos + nlp.max_length
+            section = text[start_pos:end_pos]
+            sections.append(nlp(section))   
+        return sections  
+    else:
+        return nlp(text)
+   
+
+
+def parse(df, store_path=Path.cwd() / 'pickles', out_name="parsed.pickle"):
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
+    
+    print(f"spacy model loading....\nnew collum being added to the dataframe.....")
+    df['parsed'] = df['text'].apply(parse_sections)  # create parsed column
 
-    pass
+    store_path.mkdir(parents=True, exist_ok=True)  # creates path if doesnt exist already
+    serialisation_output= (store_path / out_name)  # destination
+    print(f"serializing to pickle format...")
+
+    # adds parsed datarfame to pickle file
+    with open(serialisation_output, 'wb') as file:
+        pickle.dump(df, file)  
+    print("DataFrame Parsed to a Pickle File")
+
+    return df
 
 
 def regex_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using a regular expression."""
-    
     pass
 
 
@@ -130,7 +165,7 @@ def nltk_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize."""
 
     # tokenize text with nltk lib
-    tokens = word_tokenize(text)
+    tokens = word_tokenize(text.lower())
     token_types = set(tokens)
     token_type_ratio= len(token_types) / len(tokens)
 
@@ -155,10 +190,11 @@ def get_fks(df):
     return f"\nFlech-Kincaid Grade level scores: {results}"
 
 
-def subjects_by_verb_pmi(doc, target_verb):
-    """Extracts the most common subjects of a given verb in a parsed document. Returns a list of tuples."""
-    
+
+def subjects_by_verb_pmi(doc, target_verb, top_n=10):
+    """Extracts the most common subjects of a given verb in a parsed document sorted by PMI."""
     pass
+
 
 
 
@@ -168,11 +204,10 @@ def subjects_by_verb_count(doc, verb):
 
 
 
+
 def subject_counts(doc):
     """Extracts the most common subjects in a parsed document. Returns a list of tuples."""
     pass
-
-
 
 
 
@@ -180,30 +215,26 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    
 
-    path = Path.cwd() / "texts" / "novels"
+
+    path = Path.cwd() / "p1-texts" / "novels"
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
-    print(df.head(10))
-    nltk.download("cmudict")
+    #print(df.head(10))
+    #nltk.download("cmudict")
     #parse(df)
-    #print(df.head())
+    print(df.head())
     print(get_ttrs(df))
     print(get_fks(df))
-    #df = pd.read_pickle(Path.cwd() / "texts" / "novels" / "parsed" / "name.pickle")
-    # print(get_subjects(df))
+    df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
+    print(df.head())
+    #print(get_subjects(df))
 
 
     """ 
     for i, row in df.iterrows():
-        print(row["title"])
-        print(subjects_by_verb_count(row["parsed"], "say"))
-        print("\n")
-
-    for i, row in df.iterrows():
-        print(row["title"])
-        print(subjects_by_verb_pmi(row["parsed"], "say"))
-        print("\n")
+    print(row["title"])
+    print(subjects_by_verb_count(row["parsed"], "say"))
+    print("\n")
     """
-
+    
