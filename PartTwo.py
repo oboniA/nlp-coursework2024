@@ -1,5 +1,7 @@
 import pandas as pd
-from pathlib import Path
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import StratifiedShuffleSplit
+
 
 # Task 2 (a)
 def rename_dataframe(filename):
@@ -43,8 +45,43 @@ def rename_dataframe(filename):
 
 
 
+
+def speech_vectorization(df):
+
+    # drops any None Value
+    df_clean = df.dropna(subset=['speech', 'party'])
+
+    speech_x = df_clean['speech']
+    party_y = df_clean['party']   # predictor y axis
+
+    # vectorizer initiated with parameters
+    tfidf_V = TfidfVectorizer(stop_words='english', max_features=4000)
+
+    # split train test with random seed = 99, test data 20%
+    print(f"split train test")
+    stratified= StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=99)
+    for i,(train_index, test_index) in enumerate(stratified.split(speech_x, party_y)):
+        # aplying tfidfvectorizers to extract features
+        speech_X_train = tfidf_V.fit_transform(speech_x.iloc[train_index])
+        speech_X_test = tfidf_V.fit_transform(speech_x.iloc[test_index])
+
+        print(f"\nfold{i}")
+        print(f"train index: {train_index}")
+        print(f"test: {test_index}")
+
+        print(f"speech Training data vectorised:\n{speech_X_train[:7]}")
+        print(f"speech Test data vectorised:\n{speech_X_test[:7]}\n")
+    
+    return speech_X_train, speech_X_test
+
+
+
+
 if __name__ == "__main__":
 
     path = "p2-texts/hansard40000.csv"
-    print(rename_dataframe(path))
+    #print(rename_dataframe(path))
+
+    df = pd.read_csv(path)
+    print(speech_vectorization(df))
 
