@@ -6,7 +6,6 @@ from sklearn.metrics import f1_score, classification_report
 from sklearn.svm import SVC
 
 
-
 # Task 2 (a)
 def rename_dataframe(filename):
 
@@ -41,15 +40,11 @@ def rename_dataframe(filename):
     # renamed dataframe
     renamed_df = df[(most_common_party_df) & (speech_class_df) & (speech_class_length_df)]
 
-    rows, columns = renamed_df.shape
-    
-    # print(f"rows: {rows}")
-    # print(f"columns: {columns}")
     return renamed_df
 
 
 
-
+# Task 2 (b)(d)
 def speech_vectorization(df):
 
     # drops any None Value
@@ -59,39 +54,37 @@ def speech_vectorization(df):
     party_y = df_clean['party']   # predictor y axis
 
     # vectorizer initiated with parameters
-    tfidf_V = TfidfVectorizer(stop_words='english', max_features=4000)
-
+    tfidf_V = TfidfVectorizer(stop_words='english', ngram_range=(1, 3), max_features=4000)  # ngram added for task2(d)
+    
     # split train test with random seed = 99, test data 20%
-    print(f"split train test")
     stratified= StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=99)
-    for i,(train_index, test_index) in enumerate(stratified.split(speech_x, party_y)):
+    for i, (train_index, test_index) in enumerate(stratified.split(speech_x, party_y)):
         # aplying tfidfvectorizers to extract features
         speech_X_train = tfidf_V.fit_transform(speech_x.iloc[train_index])
         speech_X_test = tfidf_V.fit_transform(speech_x.iloc[test_index])
         party_y_train = party_y.iloc[train_index]
         party_y_test = party_y.iloc[test_index]
 
-        # print(f"\nfold{i}")
-        
-        # print(f"speech Training data vectorised:\n{speech_X_train[:7]}")
-        # print(f"speech Test data vectorised:\n{speech_X_test[:7]}\n")
     print(f"split complete.")
-
     return speech_X_train, speech_X_test, party_y_train, party_y_test
 
 
+
+# Task 2 (c)
 def random_forest_classification(xtrain, xtest, ytrain, ytest):
 
     print(f"\nClassifying using random forest.......")
-    rf_classifier = RandomForestClassifier(n_estimators=400, random_state=0)
+    rf_classifier = RandomForestClassifier(n_estimators=400, random_state=99)
     rf_classifier.fit(xtrain, ytrain)
     rf_party_pred = rf_classifier.predict(xtest)
 
     rf_f1 = f1_score(ytest, rf_party_pred, average='macro')
-    rf_report = classification_report(ytest, rf_party_pred, output_dict=True, zero_division=0)
+    rf_report = classification_report(ytest, rf_party_pred, zero_division=0)
     print(f"\n---------Random Forest Classifier------\nMarco Average F1 Score: {rf_f1}\nClassification Report:\n{rf_report}")
 
 
+
+# Task 2 (c)
 def svm_classification(xtrain, xtest, ytrain, ytest):
     print(f"\nClassifying using svm.......")
     svm_classifier= SVC(kernel='linear', random_state=99, C=1.0)
@@ -110,11 +103,10 @@ if __name__ == "__main__":
     #print(rename_dataframe(path))
 
     df = pd.read_csv(path)
-    print(speech_vectorization(df))
-
+    speech_vectorization(df)
 
     x_train, x_test, y_train, y_test = speech_vectorization(df)
-    print(random_forest_classification(x_train, x_test, y_train, y_test))
+    print(random_forest_classification(x_train, x_test, y_train, y_test)) 
     print(svm_classification(x_train, x_test, y_train, y_test))
 
     
