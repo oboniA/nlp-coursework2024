@@ -6,6 +6,8 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 import re
 import pickle
 from collections import Counter
+import math
+
 
 
 
@@ -192,64 +194,112 @@ def get_fks(df):
 
 
 
-def subjects_by_verb_pmi(doc, target_verb, top_n=10):
-    """Extracts the most common subjects of a given verb in a parsed document sorted by PMI."""
-    pass
+def subjects_by_verb_pmi(doc, target_verb):
+    """Extracts the most common subjects of a given verb in a parsed document, sorted by pmi value
+      Returns a list of tuples."""
+    
+    #pmi variables
+    total_verb_count=0
+    total_sub_count= 0
+
+    sub_counts = Counter()
+    for token in doc:
+        # dependancy parcing for the main verb 
+        if token.lemma_ == target_verb and token.dep_ == "ROOT":
+            total_verb_count += 1
+            for child in token.children:
+                 # checks if a nominal subject of the verb
+                if child.dep_  == 'nsubj':
+                    sub_counts[child.text.lower()] += 1
+                    total_sub_count += 1
+    total_token_length = len(doc)
+
+    # pmi calculation
+    pmi_list = []
+    #print(f"Calculating PMI.......")
+    for subs, count in sub_counts.items():
+        p_verb = total_verb_count / total_token_length
+        p_sub = total_sub_count / total_token_length
+        p_sub_verb = count / total_verb_count
+
+        pmi_score = math.log2(p_sub_verb / (p_sub * p_verb))
+        pmi_list.append((subs, pmi_score))
+
+    # Sort subjects by PMI (descending order)
+    pmi_list.sort(reverse=True)
+    top10_common= pmi_list[:10]
+    sorted_subjects = sorted(top10_common, key=lambda x: x[1], reverse=True)[:10]
+    return sorted_subjects
 
 
 
+def get_sub_verb_pmi(df, verb):
+    """getter func for subjects_by_verb_pmi()"""
+
+    for i, row in df.iterrows():
+        novel_title = row["title"]
+        parse_doc = nlp(row["parsed"])
+        
+        print(f"\nNovel {i+1} Title: {novel_title}")
+        print(f" 10 common syntactic subjects of verb, ordered by pmi:\n", subjects_by_verb_pmi(parse_doc, verb))
+    return f"Complete.\n"
+
+    
 
 def subjects_by_verb_count(doc, verb):
+
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list of tuples."""
 
-    print(f"start Subject by Verb count.....")
+    #print(f"starting Subject by Verb count.....")
     subject_counts = Counter()
     for token in doc:
         # dependancy parcing for the main verb 
-        if token.lemma_ == "say" and token.dep_ == "ROOT":
+        if token.lemma_ == verb and token.dep_ == "ROOT":
             for child in token.children:
-                # checks if it is a nominal subject of the verb
+                # checks if nominal subject of the verb
                 if child.dep_ == 'nsubj':
                     subject_counts[child.text] += 1
 
-    print(f" Subject by Verb count complete..!")
     return subject_counts.most_common(10)  # sorts in decending order
 
 
 def get_subject_by_verb(df, verb):
+    """getter func for subjects_by_verb_count()"""
 
     for i, row in df.iterrows():
         novel_title= row["title"]
         parse_doc= row["parsed"]
 
-        print(f"\nNovel {i} Title: {novel_title}")
+        print(f"\nNovel {i+1} Title: {novel_title}")
         print(f" 10 common syntactic subjects of verb 'say':\n", subjects_by_verb_count(parse_doc, verb))
+    return f"Complete.\n"
 
 
 
 def subject_counts(doc):
     """Extracts the most common subjects in a parsed document. Returns a list of tuples."""
     
-    print(f"start Subject count.....")
+    #print(f"Starting Subject count.....")
     subject_counts = Counter()
     for token in doc:
         # dependancy parsing to nominal subject
         if token.dep_ == "nsubj":
             subject_counts[token.text] += 1
 
-    print(f"Subject count complete..!")
     return subject_counts.most_common(10)
 
 
+
 def get_subjects(df):
+    """getter func for subject_counts()"""
+
     for i, row in df.iterrows():
         novel_title= row["title"]
         parse_doc= row["parsed"]
 
-        print(f"\nNovel {i} Title: {novel_title}")
+        print(f"\nNovel {i+1} Title: {novel_title}")
         print(f" 10 common syntactic subjects:\n", subject_counts(parse_doc))
-
-
+    return f"Complete.\n"
 
 
 
@@ -258,9 +308,8 @@ if __name__ == "__main__":
     uncomment the following lines to run the functions once you have completed them
     """
 
-
     path = Path.cwd() / "p1-texts" / "novels"
-    print(path)
+    #print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     #print(df.head(10))
     #nltk.download("cmudict")
@@ -270,14 +319,22 @@ if __name__ == "__main__":
     # print(get_fks(df))
     df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
     print(df.head())
-    #print(get_subjects(df))
+    print(get_subjects(df))
     print(get_subject_by_verb(df, 'say'))
+    print(get_sub_verb_pmi(df, 'say'))
 
-
+  
     """ 
     for i, row in df.iterrows():
     print(row["title"])
     print(subjects_by_verb_count(row["parsed"], "say"))
     print("\n")
+
+
+
+    for i, row in df.iterrows():
+        print(row["title"])
+        print(subjects_by_verb_pmi(row["parsed"], "say"))
+        print("\n")
     """
     
