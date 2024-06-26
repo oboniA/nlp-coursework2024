@@ -1,6 +1,9 @@
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import f1_score, classification_report
+
 
 
 # Task 2 (a)
@@ -39,8 +42,8 @@ def rename_dataframe(filename):
 
     rows, columns = renamed_df.shape
     
-    print(f"rows: {rows}")
-    print(f"columns: {columns}")
+    # print(f"rows: {rows}")
+    # print(f"columns: {columns}")
     return renamed_df
 
 
@@ -64,18 +67,30 @@ def speech_vectorization(df):
         # aplying tfidfvectorizers to extract features
         speech_X_train = tfidf_V.fit_transform(speech_x.iloc[train_index])
         speech_X_test = tfidf_V.fit_transform(speech_x.iloc[test_index])
+        party_y_train = party_y.iloc[train_index]
+        party_y_test = party_y.iloc[test_index]
 
-        print(f"\nfold{i}")
-        print(f"train index: {train_index}")
-        print(f"test: {test_index}")
+        # print(f"\nfold{i}")
+        
+        # print(f"speech Training data vectorised:\n{speech_X_train[:7]}")
+        # print(f"speech Test data vectorised:\n{speech_X_test[:7]}\n")
+    print(f"split complete.")
 
-        print(f"speech Training data vectorised:\n{speech_X_train[:7]}")
-        print(f"speech Test data vectorised:\n{speech_X_test[:7]}\n")
+    return speech_X_train, speech_X_test, party_y_train, party_y_test
+
+
+def random_forest_classification(xtrain, xtest, ytrain, ytest):
+
+    print(f"\nClassifying using random forest.......")
+    rf_classifier = RandomForestClassifier(n_estimators=400, random_state=0)
+    rf_classifier.fit(xtrain, ytrain)
+    rf_party_pred = rf_classifier.predict(xtest)
+
+    rf_f1 = f1_score(ytest, rf_party_pred, average='macro')
+    rf_report = classification_report(ytest, rf_party_pred, output_dict=True, zero_division=0)
+    print(f"\n---------Random Forest Classifier------\nMarco Average F1 Score: {rf_f1}\nClassification Report:\n{rf_report}")
+
     
-    return speech_X_train, speech_X_test
-
-
-
 
 if __name__ == "__main__":
 
@@ -84,4 +99,10 @@ if __name__ == "__main__":
 
     df = pd.read_csv(path)
     print(speech_vectorization(df))
+
+
+    x_train, x_test, y_train, y_test = speech_vectorization(df)
+    print(random_forest_classification(x_train, x_test, y_train, y_test))
+    
+
 
