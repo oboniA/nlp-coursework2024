@@ -3,6 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score, classification_report
+from sklearn.svm import SVC
 
 
 
@@ -90,7 +91,18 @@ def random_forest_classification(xtrain, xtest, ytrain, ytest):
     rf_report = classification_report(ytest, rf_party_pred, output_dict=True, zero_division=0)
     print(f"\n---------Random Forest Classifier------\nMarco Average F1 Score: {rf_f1}\nClassification Report:\n{rf_report}")
 
-    
+
+def svm_classification(xtrain, xtest, ytrain, ytest):
+    print(f"\nClassifying using svm.......")
+    svm_classifier= SVC(kernel='linear', random_state=99, C=1.0)
+    svm_classifier.fit(xtrain, ytrain)
+    svm_party_pred = svm_classifier.predict(xtest)
+
+    svm_f1 = f1_score(ytest, svm_party_pred, average='macro')
+    svm_report = classification_report(ytest, svm_party_pred, zero_division=0)
+    print(f"\n---------SVM Classifier------\nMarco Average F1 Score: {svm_f1}\nClassification Report:\n{svm_report}")
+
+
 
 if __name__ == "__main__":
 
@@ -103,6 +115,8 @@ if __name__ == "__main__":
 
     x_train, x_test, y_train, y_test = speech_vectorization(df)
     print(random_forest_classification(x_train, x_test, y_train, y_test))
+    print(svm_classification(x_train, x_test, y_train, y_test))
+
     
 
 
