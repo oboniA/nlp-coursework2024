@@ -1,1 +1,52 @@
-Answers to the text questions go here.
+Part 1  (d)
+
+Written orthography such as word length, sentence length and word complexities are used to make an 
+estimation of the difficulty of understanding. On the other hand,  spoken languages, sentences can often 
+be too long or short, too complex, or unclear. The structure of a written text and text from 
+speech may impact on readibility test such as Flesch-Kincaid. It uses no. of syllables per word, text length
+to estimate the readibility. Spoken texts often contain informal phrases, repetitions, mispronunciations, pauses, 
+or incomplete sentences. These factors may make it difficult to capture the text lenght or syllables accurately. 
+Therefore, it is not recommended to use a readibility formula to text from speeches.
+
+Similarly, readibility may be difficult in other languages because of every language has difference phonetics and 
+orthography. For example, languages like Japanese, Arabic, Chinese etc are non-phonetic languages, so the readibility 
+system will not be able to understand the text lengths or syllable counts. It is primarily designed for English, thus
+may not capture structural complexities of sentences, vocabularies, or semantic ambiguities. 
+
+
+
+Part 2 (f)
+
+custom_token() is a tokenizer function which is created for data preprocessing to improve the classification performance, 
+such as precisions, f1 scores, recalls etc. This function is then called inside custom_vectorizer(), as a parameter of 
+tfidTfidfVectorizer(). 
+
+Explaination:
+1) uses a contractions library that helps to expand words to their full form. for example from "don't" to "do not", 
+"can't to "can not". It is used to standardize the texts into an analyzable form. 
+
+2) uses .lower() to make every character lowercase to maintain a consistent flow. 
+
+3) Punctuation makes the data ambiguous, and makes it hard to train on. So removes Punctuations to prevent noise using 
+punctiation() of string library. 
+
+4) Removes english stop words such as "is, the, and, to" etc as they are frequently occuring words, which are often not
+informative for classification tasks. 
+
+5) uses nltk's word_tokenizer package to split texts into tokens or words.
+
+6) Lemmatizes and stems the texts to reduce words to their root. 
+Stemming will remove suffix. For example, "cats, played" will be "cat, play". 
+Similarly, lemmatization turns word to its original/root form. E.g., "best, faster" to
+"good, fast" etc.
+
+After applying the custom tokenizer to the tfidTfidfVectorizer, there was an improvement in the f1 score of the models. 
+In the case of 2(e), the better performing classifier after tokenization was SVM. Compared to the SVM classifiers in 
+2(c) and (d), the overall f1 score goes up from 0.61 to 0.63. It is also observed that most of the three of the four precision 
+and recall values are also slightly better. The overall accuracy increases from 0.80 to 0.81. Overall, using the customed tokenizer slightly improves the performance of 
+the svm classifier. 
+
+
+
+
+
