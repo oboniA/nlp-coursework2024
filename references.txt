@@ -1,0 +1,16 @@
+https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
+https://www.geeksforgeeks.org/python-lemmatization-with-nltk/
+https://www.tutorialspoint.com/python-pandas-how-to-delete-a-row-from-a-dataframe
+https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
+https://stackoverflow.com/questions/74794944/what-does-this-children-attribute-do
+https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC
+https://www.kdnuggets.com/2022/11/getting-started-spacy-nlp.html
+https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.iloc.html
+https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html
+https://scikit-learn.org/stable/modules/generated/sklearn.metrics.classification_report.html
+https://stackoverflow.com/questions/16310015/what-does-this-mean-key-lambda-x-x1
+https://note.nkmk.me/en/python-function-return-multiple-values/
+https://www.geeksforgeeks.org/python-lemmatization-with-nltk/
+https://stackoverflow.com/questions/67370046/remove-a-row-in-pandas-dataframe-if-multiple-columns-contains-specific-value
+https://scikit-learn.org/stable/auto_examples/text/plot_document_classification_20newsgroups.html
